@@ -25,6 +25,7 @@ class DataPassThroughSchema():
 
 _data_type_schemas = {   # NOTE: class schemas require () to indicate class method call required
     "Statement": StatementSchema,  # instance schema
+    "Disclaimer": None,
     "Account Information": AccountInformationSchema,  # instance schema
     "Net Asset Value": NetAssetValueSchema(),  # class schema
     "Change in NAV": None,
@@ -34,6 +35,7 @@ _data_type_schemas = {   # NOTE: class schemas require () to indicate class meth
     "Cash Report": None,
     "Open Positions": OpenPositionsSchema(),
     "Trades": TradeInputSchema(),
+    "Transfers": None,
     "Forex Balances": ForexBalancesSchema(),
     "Corporate Actions": None,
     "Deposits & Withdrawals": DepositsWithdrawalsSchema(),
@@ -142,48 +144,3 @@ def process_csv(
                 pass
 
     return result
-
-
-def process_row(datafile: Union[Path, str], data_type_schemas: dict, data_types_to_process: list = None):
-    """
-    generator that processes rows in datafile using a handler dict indicating
-    what type of data is handled by what hander def
-    :param data_type_schemas: dict of key==data type (csv row 0 position) and val is schema for serializing
-    :param datafile: input csv file path
-    :param data_types_to_process: list of data types to fetch, all if not provided
-    """
-    with open(datafile, newline='') as csvfile:
-        datareader = csv.reader(csvfile, delimiter=',')
-        for row in datareader:
-            data_type = row[0]
-            # if data_type == "Statement" and row[1] == "Data":
-            #    statement[row[-2]] = row[-3]
-            # if data_type == "Account Information" and row[1] == "Data":
-            #    account_information[row[-2]] = row[-3]
-            if data_types_to_process:
-                if data_type not in data_types_to_process:
-                    continue
-            row_schema = _data_type_schemas.get(data_type, None)
-            if not row_schema:
-                print(f"SKIPPING NOT IMPLEMENTED DATA ROW TYPE {data_type}")
-            if row[1] == "Header":
-                header = preprocess_header_keys(row[2:])
-            elif row[1] == "Data" and header:
-                data_dict = dict(zip(header, row[2:]))
-                if row_schema:
-                    try:
-                        dump_dict = row_schema.dump(data_dict)
-                        print(dump_dict)
-                        dump_dict = add_local_base(forex_rate, dump_dict)
-                        print(dump_dict)
-                    except:  # noqa - can be many schema/ field related types
-                        dump_dict = None
-                        print("ERROR ON THE BELOW **************************")
-                        print(data_dict)
-                    if dump_dict:
-                        yield (data_type, dump_dict)
-
-                else:
-                    print(f"NOT ABLE TO DUMP! {data_dict}")
-            else:
-                pass

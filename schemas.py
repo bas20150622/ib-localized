@@ -89,6 +89,7 @@ class TradeInputSchema(BaseSchema):
     Quantity = ThousandField()
     Proceeds = fields.Decimal()
     Currency = fields.Str()
+    Account = fields.Str()
     MTM_PnL = fields.Decimal()
     MTM_in_USD = fields.Decimal()
     Comm_in_USD = fields.Decimal()
@@ -108,7 +109,9 @@ class TradeInputSchema(BaseSchema):
             "Stocks": TradeType.STOCKS,
             "Equity and Index Options": TradeType.OPTIONS,
             "CFDs": TradeType.CFDs,
-            "Forex": TradeType.FOREX
+            "Forex CFDs": TradeType.FOREX_CFDs,
+            "Forex": TradeType.FOREX,
+
         }
         data_type = data.get("Asset_Category")
         for match_str, trade_type in mapper.items():
@@ -200,6 +203,7 @@ class DepositsWithdrawalsSchema(BaseSchema):
         unknown = EXCLUDE
 
     Currency = fields.Str()
+    Account = fields.Str()
     DateTime = ToDateField(attribute="Settle_Date")
     Description = fields.Str()
     Amount = ThousandField()
@@ -220,6 +224,7 @@ class DividendsSchema(BaseSchema):
         unknown = EXCLUDE
 
     Currency = fields.Str()
+    Account = fields.Str()
     DateTime = ToDateField(attribute="Date")
     Description = fields.Str()
     Amount = ThousandField()
@@ -240,6 +245,7 @@ class WitholdingTaxSchema(BaseSchema):
         unknown = EXCLUDE
 
     Currency = fields.Str()
+    Account = fields.Str()
     DateTime = ToDateField(attribute="Date")
     Description = fields.Str()
     Amount = ThousandField()
@@ -252,7 +258,7 @@ class WitholdingTaxSchema(BaseSchema):
         return data
 
 
-class NameValueSchema(BaseSchema):
+class _NameValueSchema(BaseSchema):
     """
     Schema for selectively processing Field Name: Field Value
     type row data (Statement and Account Information)
@@ -271,8 +277,8 @@ class NameValueSchema(BaseSchema):
         return in_data
 
 
-StatementSchema = NameValueSchema()
+StatementSchema = _NameValueSchema()
 StatementSchema.context = {"type": NameValueType.STATEMENT}
 
-AccountInformationSchema = NameValueSchema()
+AccountInformationSchema = _NameValueSchema()
 AccountInformationSchema.context = {"type": NameValueType.ACCOUNT_INFORMATION}

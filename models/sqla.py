@@ -95,6 +95,7 @@ class Trade(Base):
     Quantity = Column(Numeric(6, 2))
     Proceeds = Column(Numeric(6, 2))
     Currency = Column(String(16), nullable=False)
+    Account = Column(String(16))
     MTM_PnL = Column(Numeric(6, 2))
     MTM_in_USD = Column(Numeric(6, 2))
     Comm_in_USD = Column(Numeric(6, 2))
@@ -185,6 +186,7 @@ class DepositsWithdrawals(Base):
         'account.id', ondelete="CASCADE"), nullable=True)
 
     Currency = Column(String(16), nullable=False)
+    Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))
@@ -202,6 +204,7 @@ class Dividends(Base):
         'account.id', ondelete="CASCADE"), nullable=True)
 
     Currency = Column(String(16), nullable=False)
+    Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))
@@ -219,6 +222,7 @@ class WitholdingTax(Base):
         'account.id', ondelete="CASCADE"), nullable=True)
 
     Currency = Column(String(16), nullable=False)
+    Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))

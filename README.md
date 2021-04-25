@@ -41,6 +41,11 @@ purposes.
 
 ## TODO
 
+- add transfers
+- add fees
+- add interest
+- add codes
+
 ## Key Modules
 
 - csv_parser: contains csv file processing algorithms
