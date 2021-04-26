@@ -61,6 +61,23 @@ def calc_balance():
         f"{(totals * EOY_BASE_LOCAL).quantize(QUANTIZE_FIAT)} {LOCAL_CURRENCY}")
 
 
+def show_trade_deltas():
+    """
+    Show the per symbol trade quantities sorted by date
+    while tracking running total of balance
+    """
+    q = (
+        db.session.query(
+            Trade.Symbol, Trade.DateTime, Trade.Quantity,
+            func.sum(Trade.Quantity).over(
+                partition_by=Trade.Symbol, order_by=(Trade.DateTime)).label("Balance"),
+            Trade.QuoteInLocalCurrency, Trade.Proceeds, Trade.CommOrFee
+        )
+    )
+    for row in q:
+        print(row)
+
+
 # Statement and Account Information
 db.session.query(NameValue.type, NameValue.Name).all()
 
