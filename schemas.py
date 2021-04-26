@@ -282,3 +282,33 @@ StatementSchema.context = {"type": NameValueType.STATEMENT}
 
 AccountInformationSchema = _NameValueSchema()
 AccountInformationSchema.context = {"type": NameValueType.ACCOUNT_INFORMATION}
+
+
+class ChangeInDividendAccrualsSchema(BaseSchema):
+    """
+    Schema for selectively processing csv change in dividend accruals info
+    dump creates dict
+    """
+    class Meta:
+        unknown = EXCLUDE
+
+    Asset_Category = fields.Str()
+    Currency = fields.Str()
+    Account = fields.Str()
+    Symbol = fields.Str()
+    Date = ToDateField(attribute="Date")
+    Ex_Date = ToDateField(attribute="Ex_Date")
+    Pay_Date = ToDateField(attribute="Pay_Date")
+    Quantity = fields.Decimal()
+    Tax = fields.Decimal()
+    Fee = fields.Decimal()
+    Gross_Rate = fields.Decimal()
+    Gross_Amount = ThousandField()
+    Net_Amount = ThousandField()
+    Code = fields.Str()
+
+    @pre_dump
+    def check_and_remove_total(self, data, many, **kwargs):
+        if data.get("Currency")[:5] == "Total":
+            return
+        return data

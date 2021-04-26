@@ -2,7 +2,7 @@ import csv
 from pytz import timezone
 from schemas import TradeInputSchema, NetAssetValueSchema, OpenPositionsSchema, ForexBalancesSchema
 from schemas import DepositsWithdrawalsSchema, DividendsSchema, WitholdingTaxSchema
-from schemas import StatementSchema, AccountInformationSchema
+from schemas import StatementSchema, AccountInformationSchema, ChangeInDividendAccrualsSchema
 from forex import forex_rate
 from typing import Union, Dict, List, Any
 from pathlib import Path
@@ -42,7 +42,7 @@ _data_type_schemas = {   # NOTE: class schemas require () to indicate class meth
     "Fees": None,
     "Dividends": DividendsSchema(),
     "Withholding Tax": WitholdingTaxSchema(),
-    "Change in Dividend Accruals": None,
+    "Change in Dividend Accruals": ChangeInDividendAccrualsSchema(),
     "IBKR Managed Securities Collateral Held at IBSS (Stock Yield Enhancement Program)": None,
     "Financial Instrument Information": None,
     "Codes": None,
@@ -101,11 +101,12 @@ def preprocess_header_keys(header_row: list) -> dict:
 
 def process_csv(
         datafile: Union[Path, str],
-        data_types_to_process: list = None) -> Dict[str, List[Dict[str, Any]]]:
+        data_types_to_process: list = None, suppress_not_implemented: bool = True) -> Dict[str, List[Dict[str, Any]]]:
     """
     function to process rows in datafile
     :param datafile: input csv file path
     :param data_types_to_process: list of data types to fetch, all if not provided
+    :param suppress_not_implemented: bool indicating whether to suppress not implemented data row types
     :returns result: dictionary with key==data type and val== list of dictionaries containing row data
     """
     result = defaultdict(list)
@@ -113,6 +114,7 @@ def process_csv(
 
     with open(datafile, newline='') as csvfile:
         datareader = csv.reader(csvfile, delimiter=',')
+        print("Parsing csv file...")
         for row in datareader:
             data_type = row[0]
             # escape unicode byte order mark
@@ -121,7 +123,7 @@ def process_csv(
                 if data_type not in data_types_to_process:
                     continue
             row_schema = _data_type_schemas.get(data_type, None)
-            if not row_schema:
+            if not (row_schema or suppress_not_implemented):
                 print(f"SKIPPING NOT IMPLEMENTED DATA ROW TYPE {data_type}")
             if row[1] == "Header":
                 header = preprocess_header_keys(row[2:])
@@ -133,14 +135,16 @@ def process_csv(
                         dump_dict = add_local_base(forex_rate, dump_dict)
                     except:  # noqa - can be many schema/ field related types
                         dump_dict = None
-                        print("ERROR ON THE BELOW **************************")
-                        print(data_dict)
+                        if not suppress_not_implemented:
+                            print("ERROR ON THE BELOW **************************")
+                            print(data_dict)
                     if dump_dict:
                         result[data_type].append(dump_dict)
 
                 else:
-                    print(f"NOT ABLE TO DUMP! {data_dict}")
+                    if not suppress_not_implemented:
+                        print(f"NOT ABLE TO DUMP! {data_dict}")
             else:
                 pass
-
+    print("Finished parsing...")
     return result

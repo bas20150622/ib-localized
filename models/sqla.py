@@ -125,10 +125,10 @@ class ForexBalance(Base):
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
     Quantity = Column(Numeric(6, 2))
-    Cost_Price = Column(Numeric(6, 2))
+    Cost_Price = Column(Numeric(6, 4))
     Unrealized_PnL_in_USD = Column(Numeric(6, 2))
     Value_in_USD = Column(Numeric(6, 2))
-    Close_Price = Column(Numeric(6, 2))
+    Close_Price = Column(Numeric(6, 4))
     Cost_Basis_in_USD = Column(Numeric(6, 2))
     Code = Column(String(16))
 
@@ -165,9 +165,9 @@ class OpenPositions(Base):
     Symbol = Column(String(16), nullable=False)
     Quantity = Column(Numeric(6, 2))
     Mult = Column(Integer(), nullable=False)
-    Cost_Price = Column(Numeric(6, 2))
+    Cost_Price = Column(Numeric(6, 4))
     Cost_Basis = Column(Numeric(6, 2))
-    Close_Price = Column(Numeric(6, 2))
+    Close_Price = Column(Numeric(6, 4))
     Value = Column(Numeric(6, 2))
     Unrealized_PnL = Column(Numeric(6, 2))
     Unrealized_PnL_pct = Column(Numeric(6, 2))
@@ -194,7 +194,7 @@ class DepositsWithdrawals(Base):
 
     def __repr__(self):
         return (
-            f"DEPOSITS WITHDRAWALS ID {self.id}")
+            f"DEPOSITS WITHDRAWALS ID {self.id}: {self.Amount} {self.Currency} @ {self.DateTime}")
 
 
 class Dividends(Base):
@@ -246,7 +246,28 @@ class NameValue(Base):
 
     def __repr__(self):
         return (
-            f"NAME_VALUE ID {self.id}")
+            f"NAME_VALUE ID {self.id}/{NameValueType(self.type).name} {self.Name}: {self.Value}")
+
+
+class ChangeInDividendAccruals(Base):
+    __tablename__ = 'changedividendaccruals'
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(ForeignKey(
+        'account.id', ondelete="CASCADE"), nullable=True)
+    Asset_Category = Column(String(255), nullable=False)
+    Currency = Column(String(16), nullable=False)
+    Account = Column(String(16), nullable=True)
+    Symbol = Column(String(16), nullable=False)
+    Date = Column(DateTime, nullable=False)
+    Ex_Date = Column(DateTime, nullable=False)
+    Pay_Date = Column(DateTime, nullable=False)
+    Quantity = Column(Numeric(6, 2))
+    Tax = Column(Numeric(6, 2))
+    Fee = Column(Numeric(6, 2))
+    Gross_Rate = Column(Numeric(6, 2))
+    Gross_Amount = Column(Numeric(6, 2))
+    Net_Amount = Column(Numeric(6, 2))
+    Code = Column(String(16))
 
 
 class tradePosition(Base):
