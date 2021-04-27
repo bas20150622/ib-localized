@@ -1,7 +1,9 @@
 # Module containing the key queries that recreate the balance and pnl statement in local currency
 # WORK IN PROGRESS !!!
-from models.sqla import NameValue, Trade, OpenPositions, ForexBalance, ChangeInDividendAccruals, DepositsWithdrawals
+from models.sqla import NameValue, Trade, OpenPositions, ForexBalance, ChangeInDividendAccruals
+from models.sqla import tradePosition, DepositsWithdrawals
 from settings import LOCAL_CURRENCY
+from enums import Direction, TradePositionStatus
 from forex import forex_rate
 from enums import NameValueType
 from datetime import datetime
@@ -59,6 +61,182 @@ def calc_balance():
     print(
         f"TOTAL: {totals.quantize(QUANTIZE_FIAT)} {BASE_CURRENCY}/ "
         f"{(totals * EOY_BASE_LOCAL).quantize(QUANTIZE_FIAT)} {LOCAL_CURRENCY}")
+
+
+def calc_pnl(closing_principle: str = "FIFO"):
+    """
+    Add pnl data to the database and calculate the pnl on the basis of the trades
+    :param closing_principle: one of ["LIFO", "FIFO"], i.e. last-in-first-out or first-in-first-out,
+    when closing a position, this indicates whether to close the lastest opened (LIFO) or earlierst
+    opened (FIFO) position first
+    """
+    BASE_CURRENCY = (
+        db.session.query(NameValue.Value)
+        .filter(NameValue.type == NameValueType.ACCOUNT_INFORMATION, NameValue.Name == "Base Currency")
+        .scalar()
+    )
+
+    def _open_position(
+        qty: Decimal,
+        open_dt: datetime,
+        asset: str,
+        base_c: str,
+        local_c: str,
+        basis: Decimal,
+        open_forex: Decimal,
+        commit: bool = True
+    ):
+        """
+        add an open position to the database
+        :param qty: equity quantity
+        :param open_dt: datetime for opening position
+        :param asset: name of the asset / symbol
+        :param base_c: base currency
+        :param local_c: local currency
+        :param basis: total value in base currency for the opening trade
+        :param open_forex: base_currency.local_currency exchange rate at opening time
+        :param commit: if True, commit to db after adding, else dont
+
+        """
+        print(f"qty {qty}/ basis {basis}")
+        db.session.add(
+            tradePosition(
+                qty=qty,
+                open_dt=open_dt,
+                status=TradePositionStatus.OPEN,
+                asset=asset,
+                base_c=base_c,
+                local_c=local_c,
+                open_price=basis / qty,
+                open_forex=open_forex
+            ))
+        db.session.commit()
+
+    def _close_position(trade, closing_principle) -> bool:
+        """
+        Check if a position can be closed and execute if possible
+        return True when succesfull, else False
+        """
+
+        # check sufficient balance up to dt
+        qty_available_at_dt = (
+            db.session
+            .query(func.sum(tradePosition.qty))
+            .filter(
+                tradePosition.asset == trade.Symbol,
+                tradePosition.open_dt < trade.DateTime,
+                tradePosition.status == TradePositionStatus.OPEN)
+            .scalar()
+        )
+
+        # qty_available_at_dt = q.scalar()
+
+        if not qty_available_at_dt:
+            # no balance at this dt
+            return False
+            # raise ValueError(f"Not enough {asset} qty available at {close_dt}")
+
+        trade_qty = -trade.Quantity  # inverse sign
+
+        if qty_available_at_dt >= trade_qty:
+            # start finding open positions and reduce qty
+            q = (
+                db.session
+                .query(tradePosition)
+                .filter(
+                    tradePosition.open_dt <= trade.DateTime, tradePosition.asset == trade.Symbol,
+                    tradePosition.status == TradePositionStatus.OPEN)
+            )
+
+            if closing_principle == "LIFO":
+                fq = q.order_by(tradePosition.open_dt.desc())
+            else:
+                fq = q.order_by(tradePosition.open_dt)
+
+            remaining_qty_to_close = trade_qty
+            for open_pos in fq:
+                if remaining_qty_to_close >= open_pos.qty:
+                    print(trade.QuoteInLocalCurrency)
+                    # fully consume and close
+                    open_pos.status = TradePositionStatus.CLOSED
+                    open_pos.close_dt = trade.DateTime
+                    basis = trade.Basis
+                    if not basis:
+                        basis = trade.Proceeds - trade.Comm_in_USD
+                    open_pos.close_price = basis / trade_qty
+                    open_pos.close_forex = trade.QuoteInLocalCurrency
+
+                    pnl_base = open_pos.qty * \
+                        (basis / trade_qty - open_pos.open_price)
+                    open_pos.pnl_base = pnl_base
+                    open_pos.pnl_local = open_pos.qty * (
+                        basis / trade_qty * trade.QuoteInLocalCurrency -
+                        open_pos.open_price * open_pos.open_forex)
+                    db.session.commit()
+                    remaining_qty_to_close -= open_pos.qty
+                else:
+                    # consume partly and close and make new open pos for remainder
+                    _open_position(
+                        asset=open_pos.asset,
+                        qty=open_pos.qty - remaining_qty_to_close,
+                        basis=open_pos.open_price *
+                        (open_pos.qty - remaining_qty_to_close),
+                        open_dt=open_pos.open_dt,
+                        open_forex=open_pos.open_forex,
+                        base_c=open_pos.base_c,
+                        local_c=open_pos.local_c,
+                        commit=False
+                    )
+                    open_pos.qty = remaining_qty_to_close
+                    open_pos.status = TradePositionStatus.CLOSED
+                    open_pos.close_dt = trade.DateTime
+                    basis = trade.Basis
+                    if not basis:
+                        basis = trade.Proceeds - trade.Comm_in_USD
+                    open_pos.close_price = basis / trade_qty,
+                    open_pos.close_forex = trade.QuoteInLocalCurrency,
+                    pnl_base = remaining_qty_to_close * \
+                        (basis / trade_qty - open_pos.open_price)
+                    open_pos.pnl_base = pnl_base,
+                    open_pos.pnl_local = remaining_qty_to_close * (
+                        basis / trade_qty * trade.QuoteInLocalCurrency -
+                        open_pos.open_price * open_pos.open_forex)
+
+                    print(open_pos.close_forex)  # THIS IS THE ERROR
+                    print(open_pos.close_price)
+                    db.session.commit()
+                    break
+            return True
+
+        else:
+            # insufficient qty available at this point
+            return False
+
+    for trade in db.session.query(Trade).order_by(Trade.DateTime):
+        direction = Direction.BUY if trade.Quantity > Decimal(
+            0) else Direction.SELL
+        print(trade.QuoteInLocalCurrency)
+
+        if direction == Direction.BUY:
+            # open a position
+            basis = trade.Basis
+            if not basis:
+                basis = trade.Proceeds - trade.Comm_in_USD
+            assert basis > Decimal(0), f"ERROR: {trade.id}"
+            _open_position(qty=trade.Quantity,
+                           open_dt=trade.DateTime,
+                           asset=trade.Symbol,
+                           base_c=BASE_CURRENCY,
+                           local_c=LOCAL_CURRENCY,
+                           basis=basis,
+                           open_forex=trade.QuoteInLocalCurrency)
+        elif direction == Direction.SELL:
+            # close position
+            # pass
+            _close_position(trade, closing_principle=closing_principle)
+        else:
+            raise NotImplementedError(
+                "ERROR: incorrect Direction type received...")
 
 
 def show_trade_deltas():

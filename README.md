@@ -1,16 +1,22 @@
-# IB ACTIVITY STATEMENT IN LOCAL CURRENCY
+# IB ACTIVITY STATEMENT IN LOCAL CURRENCY - WORK IN PROGRESS...
 
-IB Activity Statement aims to create Interactive Brokers activity statement in local currency for tax reporting
-purposes.
+IB Activity Statement aims to create Interactive Brokers activity statement in local currency
+that is different from account trading base currency for tax reporting purposes
 
 ## Input requirements
 
 - download your yearly activity statement in csv format
 
-## Useage
+## Installation and Useage
 
-- open the ipython notebook and update with path to your yearly activity statement csv format file
-- UPDATE DATABASE NAME
+- download this repo
+- create a virtual environment and activate it
+- install required packages (pip install -f requirements.txt)
+- in the root directory, create a .env file and add "LOCAL_CURRENCY=YOUR_LOCAL_CURRENCY" (e.g. NOK)
+- start jupyter notebook server (from command, type "jupyter notebook"), and open the .ipynb notebook
+- in the notebook, update the DATA_DIR variable with subdirectory where your activity statement is stored
+- also update the DATA_FILE variable with the name of your yearly activity statement csv format file
+- lastly update the DATABASE_NAME variable with the name to give to the sqlite database containing the activity statement data
 
 ## Current implementation limitation
 
@@ -41,10 +47,7 @@ purposes.
 
 ## TODO
 
-- add transfers
-- add fees
-- add interest
-- add codes
+- implement missing fields
 
 ## Key Modules
 

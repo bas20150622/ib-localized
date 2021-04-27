@@ -105,18 +105,20 @@ def process_csv(
     """
     function to process rows in datafile
     :param datafile: input csv file path
-    :param data_types_to_process: list of data types to fetch, all if not provided
+    :param data_types_to_process: list of data types to fetch, fetch all implemented data types if not provided
     :param suppress_not_implemented: bool indicating whether to suppress not implemented data row types
     :returns result: dictionary with key==data type and val== list of dictionaries containing row data
     """
     result = defaultdict(list)
     header = None
+    row_count: int = 0
 
     with open(datafile, newline='') as csvfile:
         datareader = csv.reader(csvfile, delimiter=',')
         print("Parsing csv file...")
         for row in datareader:
             data_type = row[0]
+            row_count += 1
             # escape unicode byte order mark
             data_type = data_type.split('\ufeff')[-1]
             if data_types_to_process:
@@ -146,5 +148,5 @@ def process_csv(
                         print(f"NOT ABLE TO DUMP! {data_dict}")
             else:
                 pass
-    print("Finished parsing...")
+    print(f"Finished parsing {row_count} rows ...")
     return result

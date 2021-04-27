@@ -20,3 +20,13 @@ class TradePositionStatus(IntEnum):
     """ tradeposition status """
     CLOSED = 0
     OPEN = 1
+
+
+class Direction(IntEnum):
+    """ Order, Transfer and Trade related """
+    BUY = 1
+    SELL = 2
+    DEPOSIT = 3
+    WITHDRAWAL = 4
+    LONG = 5
+    SHORT = 6
