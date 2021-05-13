@@ -1,5 +1,9 @@
 # IB ACTIVITY STATEMENT IN LOCAL CURRENCY - WORK IN PROGRESS...
 
+- calculate and output balance
+- calcluate and output profit and loss
+- calculate and output net dividends (dividends - witholding tax)
+
 IB Activity Statement aims to create Interactive Brokers activity statement in local currency
 that is different from account trading base currency for tax reporting purposes
 
@@ -45,10 +49,6 @@ that is different from account trading base currency for tax reporting purposes
   - Notes/Legal Notes
   - Other
 
-## TODO
-
-- implement missing fields
-
 ## Key Modules
 
 - csv_parser: contains csv file processing algorithms
@@ -59,8 +59,8 @@ that is different from account trading base currency for tax reporting purposes
 - db.py: database access class definition
 - xcoder.py: encoders relevant for schemas/ orm models
 - enums.py: enum definitions for schemas/ orm models
+- queries: db queries providing necessary output
 - TODO add ipynb notebook
-- TODO: add queries
 
 ## Implementation details
 

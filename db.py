@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.sqla import Base
+from typing import Optional, List
 
 
 class SQLASyncDB():
@@ -21,11 +22,28 @@ class SQLASyncDB():
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
-    def create_all(self):
-        Base.metadata.create_all(bind=self.engine)
+    def create_all(self, models: Optional[List[Base]] = None):
+        """
+        Create all tables, or just the tables for the list of provided models
+        :param models: list of sqla.model types such as User, UserLocation, Trade etc...
+        """
+        if models:
+            _tables = [model.__table__ for model in models]
+            Base.metadata.create_all(bind=self.engine, tables=_tables)
+        else:
+            Base.metadata.create_all(bind=self.engine)
 
-    def drop_all(self):
-        Base.metadata.drop_all(bind=self.engine)
+    def drop_all(self, models: Optional[List[Base]] = None):
+        """
+        Drop all tables, or just the tables for the list of provided models
+        :param models: list of sqla.model types such as User, UserLocation, Trade etc...
+        """
+        if models:
+            _tables = [model.__table__ for model in models]
+            Base.metadata.drop_all(bind=self.engine, tables=_tables)
+
+        else:
+            Base.metadata.drop_all(bind=self.engine)
 
     def closeDB(self):
         self.session.close()  # close session

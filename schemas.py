@@ -227,12 +227,22 @@ class DividendsSchema(BaseSchema):
     Account = fields.Str()
     DateTime = ToDateField(attribute="Date")
     Description = fields.Str()
+    Symbol = fields.Str()
     Amount = ThousandField()
 
     @pre_dump
     def check_and_remove_total(self, data, many, **kwargs):
         if data.get("Currency")[:5] == "Total":
             return
+        return data
+
+    @pre_dump
+    def add_symbol(self, data, many, **kwargs):
+        """
+        Derive symbol from description that always seems to start with SYMBOL(CODE)
+        """
+        symbol = data.get("Description").split('(')[0]
+        data["Symbol"] = symbol
         return data
 
 
@@ -248,6 +258,7 @@ class WitholdingTaxSchema(BaseSchema):
     Account = fields.Str()
     DateTime = ToDateField(attribute="Date")
     Description = fields.Str()
+    Symbol = fields.Str()
     Amount = ThousandField()
     Code = fields.Str()
 
@@ -255,6 +266,15 @@ class WitholdingTaxSchema(BaseSchema):
     def check_and_remove_total(self, data, many, **kwargs):
         if data.get("Currency")[:5] == "Total":
             return
+        return data
+
+    @pre_dump
+    def add_symbol(self, data, many, **kwargs):
+        """
+        Derive symbol from description that always seems to start with SYMBOL(CODE)
+        """
+        symbol = data.get("Description").split('(')[0]
+        data["Symbol"] = symbol
         return data
 
 

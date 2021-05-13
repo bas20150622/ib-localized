@@ -6,6 +6,7 @@ from uuid import uuid4
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import types
 from sqlalchemy.schema import MetaData
+from datetime import datetime
 
 # Recommended naming convention used by Alembic, as various different database
 # providers will autogenerate vastly different names making migrations more
@@ -209,10 +210,11 @@ class Dividends(Base):
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))
     QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
         return (
-            f"DIVIDEND ID {self.id}")
+            f"DIVIDEND ID {self.id}: {self.Symbol}: {self.Amount} {self.Currency}")
 
 
 class WitholdingTax(Base):
@@ -228,10 +230,11 @@ class WitholdingTax(Base):
     Amount = Column(Numeric(6, 2))
     Code = Column(String(16))
     QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
         return (
-            f"WITHOLDING TAX ID {self.id}")
+            f"WITHOLDING TAX ID {self.id} {self.Symbol}: {self.Amount} {self.Currency}")
 
 
 class NameValue(Base):
@@ -273,25 +276,26 @@ class ChangeInDividendAccruals(Base):
 class tradePosition(Base):
     __tablename__ = "tradepos"
     id = Column(Integer, primary_key=True, index=True)
-    qty = Column(Numeric(5, 2))
+    qty = Column(Numeric(15, 7))
     open_dt = Column(DateTime, nullable=False)
     close_dt = Column(DateTime, nullable=True)
     status = Column(SAIntEnum(TradePositionStatus),
                     default=TradePositionStatus.OPEN)
+    created = Column(DateTime, default=datetime.utcnow)
+    updated = Column(DateTime, default=datetime.utcnow,
+                     onupdate=datetime.utcnow)
     asset = Column(String(16))
-    base_c = Column(String(16))  # base currency
-    local_c = Column(String(16))  # local currency
-    open_price = Column(Numeric(15, 7))  # currency
-    close_price = Column(Numeric(15, 7))  # currency
-    # base cost quoted in local currency @ opening
-    open_forex = Column(Numeric(15, 7))
-    # base cost quoted in local currency @ closing
-    close_forex = Column(Numeric(15, 7))
-    pnl_base = Column(Numeric(5, 2))
-    pnl_local = Column(Numeric(5, 2))
+    o_price_base = Column(Numeric(15, 7))  # opening price in base (USD)
+    c_price_base = Column(Numeric(15, 7))  # closing price in base (USD)
+    o_price_local = Column(Numeric(15, 7))  # NOK
+    c_price_local = Column(Numeric(15, 7))  # NOK
+    pnl_base = Column(Numeric(15, 7))
+    pnl_local = Column(Numeric(15, 7))
+    multiplier = Column(Integer, default=1)  # -1 for short positions
 
     def __repr__(self):
         return (
-            f'TRADEPOS {self.id} {self.status.name} {self.asset} {self.qty} @ {self.opene_price} '
-            f'- opened {self.open_dt}/ closed {self.close_dt} pnl {self.pnl if self.pnl else "N/A"}'
+            f'TRADEPOS {self.id} {self.status.name} {self.asset} {self.qty} @ {self.o_price_base}/'
+            f'{self.o_price_local}  '
+            f'- opened {self.open_dt}/ closed {self.close_dt} pnl {self.pnl_base if self.pnl_base else "N/A"}'
         )
