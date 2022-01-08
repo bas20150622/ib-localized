@@ -88,7 +88,8 @@ def calc_balance(
     Calculate the balance of equities and cash at statement end date
     """
     QUANTIZE_FIAT = Decimal('1.00')
-    sum_equity_base = sum_cash_base = sum_change_in_dividends_base = Decimal(0)
+    sum_equity_base, sum_cash_base, sum_change_in_dividends_base = Decimal(
+        0), Decimal(0), Decimal(0)
     print(f"BALANCE AT {STATEMENT_END_DATE_STR}\n")
     print("*** EQUITY BALANCE ***")
     q = (
