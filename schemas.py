@@ -63,7 +63,21 @@ class ToDateField(fields.Field):
     def _deserialize(self, value, attr, data, **kwargs):
         # load method
         return value
+        
+class Percentage(fields.Field):
+    """Field that serializes to a decimal and deserializes a string with % sign to a decimal fraction.
+    i.e. .dump("34.5%") == Decimal(0.345), .load(Decimal(0.345) == "34.5%")
+    """
 
+    def _serialize(self, value, attr, obj, **kwargs):
+        assert '%' == value[-1]
+        value = value[:-1]
+        value = value.rstrip()
+        return Decimal(value) * Decimal(1e-2)
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        
+        return str(100*value) + '%'
 
 # --- Schema definitions
 class BaseSchema(Schema):
@@ -244,6 +258,15 @@ class DividendsSchema(BaseSchema):
         symbol = data.get("Description").split('(')[0]
         data["Symbol"] = symbol
         return data
+
+class AccountSummarySchema(BaseSchema):
+    Currency = fields.Str()
+    Account = fields.Str()
+    Account_Alias = fields.Str()
+    Name=fields.Str()
+    Prior_NAV=fields.Decimal()
+    Current_NAV=fields.Decimal()
+    TWR=Percentage()
 
 
 class WitholdingTaxSchema(BaseSchema):

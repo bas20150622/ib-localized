@@ -47,6 +47,7 @@ class SAIntEnum(types.TypeDecorator):
         return self._enumtype(value)
 
 
+'''
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
@@ -81,13 +82,22 @@ class Account(Base):
 
     def __repr__(self):
         return f"Account {self.id}/ {self.account_id}: {self.user_name} @ {self.broker}"
-
+'''
+class Account(Base):
+    # for account summaries
+    __tablename__ = "accounts"
+    id = Column(Integer, primary_key=True)
+    Account = Column(String(), index=True)
+    Account_Alias = Column(String())
+    Prior_NAV = Column(Numeric(8,2))
+    Currency = Column(String())
+    Current_NAV = Column(Numeric(8,2))
+    TWR = Column(Numeric(5,2))
+    Name = Column(String())
 
 class Trade(Base):
-    __tablename__ = 'trade'
+    __tablename__ = 'trades'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
     Realized_PnL = Column(Numeric(6, 2))
     DataDiscriminator = Column(String(255), nullable=False)
     Code = Column(String(16), nullable=False)
@@ -96,7 +106,7 @@ class Trade(Base):
     Quantity = Column(Numeric(6, 2))
     Proceeds = Column(Numeric(6, 2))
     Currency = Column(String(16), nullable=False)
-    Account = Column(String(16))
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     MTM_PnL = Column(Numeric(6, 2))
     MTM_in_USD = Column(Numeric(6, 2))
     Comm_in_USD = Column(Numeric(6, 2))
@@ -119,9 +129,7 @@ class Trade(Base):
 class ForexBalance(Base):
     __tablename__ = 'forexbalance'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
@@ -142,9 +150,7 @@ class ForexBalance(Base):
 class NetAssetValue(Base):
     __tablename__ = 'netassetvalue'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Asset_Class = Column(String(255), nullable=False)
     Prior_Total = Column(Numeric(6, 2))
     Current_Long = Column(Numeric(6, 2))
@@ -161,8 +167,7 @@ class NetAssetValue(Base):
 class OpenPositions(Base):
     __tablename__ = 'openpositions'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Symbol = Column(String(16), nullable=False)
     Quantity = Column(Numeric(6, 2))
     Mult = Column(Integer(), nullable=False)
@@ -183,9 +188,7 @@ class OpenPositions(Base):
 class DepositsWithdrawals(Base):
     __tablename__ = 'depositswithdrawals'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Currency = Column(String(16), nullable=False)
     Account = Column(String(16), nullable=True)
     Description = Column(String(256))
@@ -201,11 +204,8 @@ class DepositsWithdrawals(Base):
 class Dividends(Base):
     __tablename__ = 'dividends'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Currency = Column(String(16), nullable=False)
-    Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))
@@ -220,11 +220,8 @@ class Dividends(Base):
 class WitholdingTax(Base):
     __tablename__ = 'witholdingtax'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
     Currency = Column(String(16), nullable=False)
-    Account = Column(String(16), nullable=True)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(6, 2))
@@ -240,9 +237,7 @@ class WitholdingTax(Base):
 class NameValue(Base):
     __tablename__ = 'namevalue'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
-
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Name = Column(String(256), nullable=False)
     Value = Column(String(256), nullable=False)
     type = Column(SAIntEnum(NameValueType), nullable=False)
@@ -255,11 +250,9 @@ class NameValue(Base):
 class ChangeInDividendAccruals(Base):
     __tablename__ = 'changedividendaccruals'
     id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(ForeignKey(
-        'account.id', ondelete="CASCADE"), nullable=True)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
-    Account = Column(String(16), nullable=True)
     Symbol = Column(String(16), nullable=False)
     Date = Column(DateTime, nullable=False)
     Ex_Date = Column(DateTime, nullable=False)

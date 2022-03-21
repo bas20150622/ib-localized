@@ -15,7 +15,7 @@ that is different from account trading base currency for tax reporting purposes
 
 - download this repo
 - create a virtual environment and activate it
-- install required packages (pip install -f requirements.txt)
+- install required packages (pip install -r requirements.txt)
 - in the root directory, create a .env file and add "LOCAL_CURRENCY=YOUR_LOCAL_CURRENCY" (e.g. NOK)
 - start jupyter notebook server (from command, type "jupyter notebook"), and open the .ipynb notebook
 - in the notebook, update the DATA_DIR variable with subdirectory where your activity statement is stored

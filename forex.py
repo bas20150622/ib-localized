@@ -20,7 +20,7 @@ class ForexRate():
     def __init__(self):
         # self.logger = get_logger(type(self).__name__)
         # self.logger.info('initializing exrates')
-        url = "https://data.norges-bank.no/api/data/EXR/B.USD+EUR+.NOK.SP"
+        url = "https://data.norges-bank.no/api/data/EXR/B.USD+EUR+GBP.NOK.SP"
         querystring = {
             "startPeriod": "2017-05-19",
             "endPeriod": datetime.strftime(datetime.now(), format="%Y-%m-%d"), "format": "sdmx-json", "locale": "no"}
@@ -38,16 +38,19 @@ class ForexRate():
         BASE_ORDER = [val['id'] for val in BASE_ORDER[0]]
         EURPOS = BASE_ORDER.index('EUR')
         USDPOS = BASE_ORDER.index('USD')
+        GBPPOS = BASE_ORDER.index('GBP')
 
         USD = [float(val[0]) for key, val in
                response.json()['data']['dataSets'][0]['series']['0:'+str(USDPOS)+':0:0']['observations'].items()]
         EUR = [float(val[0]) for key, val in
                response.json()['data']['dataSets'][0]['series']['0:'+str(EURPOS)+':0:0']['observations'].items()]
+        GBP = [float(val[0]) for key, val in
+               response.json()['data']['dataSets'][0]['series']['0:'+str(GBPPOS)+':0:0']['observations'].items()]
         DATES = [d['id'] for d in response.json()['data']['structure']['dimensions']
                  ['observation'][0]['values']]
 
         self.df = pd.DataFrame(index=pd.to_datetime(
-            DATES), data={'USD': USD, 'EUR': EUR})
+            DATES), data={'USD': USD, 'EUR': EUR, 'GBP': GBP})
 
     def return_formatted(self, rate: Decimal, curr: str, short_format: bool):
         """ using short_format either return only rate or Tuple[rate, curr] """
@@ -66,7 +69,7 @@ class ForexRate():
         if not isinstance(quote, str):
             raise ValueError(
                 "Error on quote: provide base=str, quote=str[default USD], dt=datetime")
-        FIAT = ["USD", "EUR", "NOK"]
+        FIAT = ["USD", "EUR", "NOK", "GBP"]
         assert base in FIAT, "Error, base not in FIAT"
         assert quote in FIAT, "Error, quote not in FIAT"
 
@@ -81,10 +84,14 @@ class ForexRate():
             quote_ix = 0
         elif quote == "EUR":
             quote_ix = 1
+        elif quote == 'GBP':
+            quote_ix = 2
         if base == "USD":
             base_ix = 0
         elif base == 'EUR':
             base_ix = 1
+        elif base == 'GBP':
+            base_ix = 2
 
         # closest index of time less or equal
         le_ix = self.df[self.df.index <= dt.replace(tzinfo=None)].index[-1]
