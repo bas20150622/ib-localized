@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, EXCLUDE, pre_dump
 from decimal import Decimal
 from xcoder import DecimalEncoder
 from datetime import datetime
-from enums import NameValueType, TradeType
+from enums import NameValueType, CategoryType
 
 
 # --- Custom field definitions
@@ -63,6 +63,21 @@ class ToDateField(fields.Field):
     def _deserialize(self, value, attr, data, **kwargs):
         # load method
         return value
+
+class DashDashEmptyThousandDecimalField(fields.Field):
+    # field that can be "--", "", "xxx,yyy.zz" convert to Decimal
+    def _serialize(self, value, attr, obj, **kwargs):
+        # dump method for "--" vs "decimalstring"
+        if value in ["","--"]:
+
+            return "0"
+        _val= value.replace(",", "")
+
+        return _val
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        # load method
+        return str(value)
         
 class Percentage(fields.Field):
     """Field that serializes to a decimal and deserializes a string with % sign to a decimal fraction.
@@ -85,6 +100,37 @@ class BaseSchema(Schema):
 
     def dumps(self, obj, **kwargs):
         return super().dumps(obj, cls=DecimalEncoder, **kwargs)
+
+class Mark2MarketSchema(BaseSchema):
+    Asset_Category = fields.Str()
+    Symbol = fields.Str()
+    Prior_Quantity = DashDashEmptyThousandDecimalField()
+    Current_Quantity = DashDashEmptyThousandDecimalField()
+    Prior_Price = DashDashEmptyThousandDecimalField()
+    Current_Price = DashDashEmptyThousandDecimalField()
+    Mark_to_Market_PnL_Position = DashDashEmptyThousandDecimalField()
+    Mark_to_Market_PnL_Transaction = DashDashEmptyThousandDecimalField()
+    Mark_to_Market_PnL_Commissions = DashDashEmptyThousandDecimalField()
+    Mark_to_Market_PnL_Other = DashDashEmptyThousandDecimalField()
+    Mark_to_Market_PnL_Total = DashDashEmptyThousandDecimalField()
+    Code = fields.Str()
+    type = MMIntEnum(CategoryType)
+
+    @pre_dump
+    def add_category_type(self, data, **kwargs):
+        mapper = {
+            "Stocks": CategoryType.STOCKS,
+            "Equity and Index Options": CategoryType.OPTIONS,
+            "CFDs": CategoryType.CFDs,
+            "Forex CFDs": CategoryType.FOREX_CFDs,
+            "Forex": CategoryType.FOREX,
+
+        }
+        data_type = data.get("Asset_Category")
+        for match_str, trade_type in mapper.items():
+            if data_type[:len(match_str)] == match_str:
+                data["type"] = trade_type
+        return data
 
 
 class TradeInputSchema(BaseSchema):
@@ -115,16 +161,16 @@ class TradeInputSchema(BaseSchema):
     Basis = fields.Decimal()
     T_Price = fields.Decimal()  # trade price
     QuoteInLocalCurrency = fields.Decimal()
-    type = MMIntEnum(TradeType)
+    type = MMIntEnum(CategoryType)
 
     @pre_dump
-    def add_trade_type(self, data, **kwargs):
+    def add_category_type(self, data, **kwargs):
         mapper = {
-            "Stocks": TradeType.STOCKS,
-            "Equity and Index Options": TradeType.OPTIONS,
-            "CFDs": TradeType.CFDs,
-            "Forex CFDs": TradeType.FOREX_CFDs,
-            "Forex": TradeType.FOREX,
+            "Stocks": CategoryType.STOCKS,
+            "Equity and Index Options": CategoryType.OPTIONS,
+            "CFDs": CategoryType.CFDs,
+            "Forex CFDs": CategoryType.FOREX_CFDs,
+            "Forex": CategoryType.FOREX,
 
         }
         data_type = data.get("Asset_Category")
@@ -132,6 +178,57 @@ class TradeInputSchema(BaseSchema):
             if data_type[:len(match_str)] == match_str:
                 data["type"] = trade_type
         return data
+
+class CashReportSchema(BaseSchema):
+    Currency_Summary = fields.Str()
+    Account = fields.Str()
+    Currency = fields.Str()
+    Total = fields.Decimal()
+    Securities= fields.Decimal()
+    Futures = fields.Decimal()
+    IB_UKL = fields.Decimal()
+    QuoteInLocalCurrency = fields.Decimal()
+
+class TransferSchema(BaseSchema):
+    class Meta:
+        unknown = EXCLUDE
+        
+    Asset_Category = fields.Str()
+    Currency = fields.Str()
+    Account = fields.Str()
+    Symbol = fields.Str()
+    DateTime = ToDateField(attribute="Date")
+    _Type = fields.Str(attribute="Type")
+    Direction = fields.Str()
+    Xfer_Company = fields.Str()
+    Xfer_Account = fields.Str()
+    Qty = fields.Decimal()
+    Xfer_Price = DashDashEmptyThousandDecimalField()  
+    Market_Value = fields.Decimal()
+    Realized_PnL = fields.Decimal()
+    Cash_Amount = fields.Decimal()
+    Code = fields.Str()
+    QuoteInLocalCurrency = fields.Decimal()
+    
+    type = MMIntEnum(CategoryType)
+    
+
+    @pre_dump
+    def add_category_type(self, data, **kwargs):
+        mapper = {
+            "Stocks": CategoryType.STOCKS,
+            "Equity and Index Options": CategoryType.OPTIONS,
+            "CFDs": CategoryType.CFDs,
+            "Forex CFDs": CategoryType.FOREX_CFDs,
+            "Forex": CategoryType.FOREX,
+
+        }
+        data_type = data.get("Asset_Category")
+        for match_str, trade_type in mapper.items():
+            if data_type[:len(match_str)] == match_str:
+                data["type"] = trade_type
+        return data
+    
 
 
 class ForexBalancesSchema(BaseSchema):

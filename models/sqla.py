@@ -1,4 +1,4 @@
-from enums import TradePositionStatus, NameValueType, TradeType
+from enums import TradePositionStatus, NameValueType, CategoryType
 from sqlalchemy import Column, Integer, Numeric, UniqueConstraint
 from sqlalchemy import ForeignKey, DateTime
 from sqlalchemy import String
@@ -118,12 +118,78 @@ class Trade(Base):
     Basis = Column(Numeric(6, 2))
     T_Price = Column(Numeric(6, 2))  # trade price
     QuoteInLocalCurrency = Column(Numeric(6, 2))
-    type = Column(SAIntEnum(TradeType), nullable=False)
+    type = Column(SAIntEnum(CategoryType), nullable=False)
 
     def __repr__(self):
         return (
             f"TRADE ID {self.id}"
         )
+
+class Transfer(Base):
+    __tablename__ = 'transfers'
+    id = Column(Integer, primary_key=True, index=True)
+    Asset_Category  = Column(String(255), nullable=False)
+    Currency = Column(String(16), nullable=False)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Symbol = Column(String(16), nullable=False)
+    DateTime = Column(DateTime, nullable=False)
+    _Type = Column(String(255), nullable=False)
+    Direction = Column(String(16), nullable=False)
+    Xfer_Company = Column(String(255), nullable=False)
+    Xfer_Account = Column(String(32), nullable=False)
+    Qty = Column(Numeric(6, 2))
+    Xfer_Price = Column(Numeric(6, 2))  
+    Market_Value = Column(Numeric(6, 2))
+    Realized_PnL = Column(Numeric(6, 2))
+    Cash_Amount = Column(Numeric(6, 2))
+    Code = Column(String(16), nullable=False)
+    type = Column(SAIntEnum(CategoryType), nullable=False)
+    QuoteInLocalCurrency = Column(Numeric(6, 2))
+
+    def __repr__(self):
+        return (
+            f"TRANSER ID {self.id}"
+        )
+
+
+class CashReport(Base):
+    __tablename__ = 'cashreport'
+    id = Column(Integer, primary_key=True, index=True)
+    Currency_Summary = Column(String(255))
+    Currency = Column(String(16), nullable=False)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Total = Column(Numeric(6, 2))
+    Securities= Column(Numeric(6, 2))
+    Futures = Column(Numeric(6, 2))
+    IB_UKL = Column(Numeric(6, 2))
+    QuoteInLocalCurrency = Column(Numeric(6, 2))
+
+    def __repr__(self):
+        return (
+            f"CASHREPORT ID {self.id}"
+        )
+
+class Mark2Market(Base):
+    __tablename__ = 'mark2market'
+    id = Column(Integer, primary_key=True, index=True)
+    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Asset_Category = Column(String(255))
+    Symbol = Column(String(16), nullable=False)
+    Prior_Quantity = Column(Numeric(6, 2))
+    Current_Quantity = Column(Numeric(6, 2))
+    Prior_Price = Column(Numeric(6, 2))
+    Current_Price = Column(Numeric(6, 2))
+    Mark_to_Market_PnL_Position = Column(Numeric(6, 2))
+    Mark_to_Market_PnL_Transaction = Column(Numeric(6, 2))
+    Mark_to_Market_PnL_Commissions = Column(Numeric(6, 2))
+    Mark_to_Market_PnL_Other = Column(Numeric(6, 2))
+    Mark_to_Market_PnL_Total = Column(Numeric(6, 2))
+    Code = Column(String(16))
+    type = Column(SAIntEnum(CategoryType), nullable=False)
+
+    def __repr__(self):
+        return (
+            f"MARK2MARKET ID {self.id}")
 
 
 class ForexBalance(Base):

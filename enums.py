@@ -3,7 +3,7 @@ from enum import IntEnum
 # ********** IntEnum definitions
 
 
-class TradeType(IntEnum):
+class CategoryType(IntEnum):
     STOCKS = 1
     CFDs = 2
     OPTIONS = 3

@@ -3,7 +3,7 @@
 from models.sqla import NameValue, Trade, OpenPositions, ForexBalance, ChangeInDividendAccruals
 from models.sqla import tradePosition, Dividends, WitholdingTax, DepositsWithdrawals
 from settings import LOCAL_CURRENCY
-from enums import Direction, TradePositionStatus, TradeType
+from enums import Direction, TradePositionStatus, CategoryType
 # from forex import forex_rate
 from enums import NameValueType
 from datetime import datetime
@@ -39,7 +39,7 @@ def base_query(session: Session) -> Query:
             ).label("cost"),
             Trade.type.label("t")
         )
-        .filter(Trade.type != TradeType.FOREX)
+        .filter(Trade.type != CategoryType.FOREX)
     )
     d2 = (  # trade base exclusively forex
         session.query(
@@ -53,7 +53,7 @@ def base_query(session: Session) -> Query:
             (Trade.Proceeds + Trade.Comm_in_USD).label("cost"),
             Trade.type.label("t")
         )
-        .filter(Trade.type == TradeType.FOREX)
+        .filter(Trade.type == CategoryType.FOREX)
     )
     d5 = (
         session.query(
@@ -64,7 +64,7 @@ def base_query(session: Session) -> Query:
             DepositsWithdrawals.QuoteInLocalCurrency.label("forex"),
             null().label("quote"),
             null().label("cost"),
-            literal(TradeType.STOCKS).label("t")
+            literal(CategoryType.STOCKS).label("t")
         )
     )
     u = d1.union_all(d2, d5).subquery()
@@ -321,7 +321,7 @@ def process_base_query(in_session: Session, out_session: Session, forex_rate: Fo
     for base, dt, qty, balance, quote, cost, forex, _type in base:
         multiplier = 1  # default for long positions
 
-        if _type == TradeType.CFDs:
+        if _type == CategoryType.CFDs:
             # CFDs are short or long positions, direction is determined by qty sign and balance
             if qty < 0 and balance < 0:
                 # open short pos
