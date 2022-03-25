@@ -98,26 +98,26 @@ class Account(Base):
 class Trade(Base):
     __tablename__ = 'trades'
     id = Column(Integer, primary_key=True, index=True)
-    Realized_PnL = Column(Numeric(6, 2))
+    Realized_PnL = Column(Numeric(8, 4))
     DataDiscriminator = Column(String(255), nullable=False)
     Code = Column(String(16), nullable=False)
-    Realized_PnL_pct = Column(Numeric(6, 2))
-    CommOrFee = Column(Numeric(6, 2))
-    Quantity = Column(Numeric(6, 2))
-    Proceeds = Column(Numeric(6, 2))
+    Realized_PnL_pct = Column(Numeric(8, 4))
+    CommOrFee = Column(Numeric(8, 4))
+    Quantity = Column(Numeric(8, 4))
+    Proceeds = Column(Numeric(8, 4))
     Currency = Column(String(16), nullable=False)
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
-    MTM_PnL = Column(Numeric(6, 2))
-    MTM_in_USD = Column(Numeric(6, 2))
-    Comm_in_USD = Column(Numeric(6, 2))
+    MTM_PnL = Column(Numeric(8, 4))
+    MTM_in_USD = Column(Numeric(8, 4))
+    Comm_in_USD = Column(Numeric(8, 4))
     Asset_Category = Column(String(255), nullable=False)
     Symbol = Column(String(16), nullable=False)
-    Notional_Value = Column(Numeric(6, 2))
-    C_Price = Column(Numeric(6, 2))  # current price
+    Notional_Value = Column(Numeric(8, 4))
+    C_Price = Column(Numeric(8, 4))  # current price
     DateTime = Column(DateTime, nullable=False)
-    Basis = Column(Numeric(6, 2))
-    T_Price = Column(Numeric(6, 2))  # trade price
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Basis = Column(Numeric(8, 4))
+    T_Price = Column(Numeric(8, 4))  # trade price
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
     type = Column(SAIntEnum(CategoryType), nullable=False)
 
     def __repr__(self):
@@ -137,14 +137,14 @@ class Transfer(Base):
     Direction = Column(String(16), nullable=False)
     Xfer_Company = Column(String(255), nullable=False)
     Xfer_Account = Column(String(32), nullable=False)
-    Qty = Column(Numeric(6, 2))
-    Xfer_Price = Column(Numeric(6, 2))  
-    Market_Value = Column(Numeric(6, 2))
-    Realized_PnL = Column(Numeric(6, 2))
-    Cash_Amount = Column(Numeric(6, 2))
+    Qty = Column(Numeric(8, 4))
+    Xfer_Price = Column(Numeric(8, 4))  
+    Market_Value = Column(Numeric(8, 4))
+    Realized_PnL = Column(Numeric(8, 4))
+    Cash_Amount = Column(Numeric(8, 4))
     Code = Column(String(16), nullable=False)
     type = Column(SAIntEnum(CategoryType), nullable=False)
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
         return (
@@ -158,11 +158,11 @@ class CashReport(Base):
     Currency_Summary = Column(String(255))
     Currency = Column(String(16), nullable=False)
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
-    Total = Column(Numeric(6, 2))
-    Securities= Column(Numeric(6, 2))
-    Futures = Column(Numeric(6, 2))
-    IB_UKL = Column(Numeric(6, 2))
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Total = Column(Numeric(8, 4))
+    Securities= Column(Numeric(8, 4))
+    Futures = Column(Numeric(8, 4))
+    IB_UKL = Column(Numeric(8, 4))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
         return (
@@ -175,15 +175,15 @@ class Mark2Market(Base):
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Asset_Category = Column(String(255))
     Symbol = Column(String(16), nullable=False)
-    Prior_Quantity = Column(Numeric(6, 2))
-    Current_Quantity = Column(Numeric(6, 2))
-    Prior_Price = Column(Numeric(6, 2))
-    Current_Price = Column(Numeric(6, 2))
-    Mark_to_Market_PnL_Position = Column(Numeric(6, 2))
-    Mark_to_Market_PnL_Transaction = Column(Numeric(6, 2))
-    Mark_to_Market_PnL_Commissions = Column(Numeric(6, 2))
-    Mark_to_Market_PnL_Other = Column(Numeric(6, 2))
-    Mark_to_Market_PnL_Total = Column(Numeric(6, 2))
+    Prior_Quantity = Column(Numeric(8, 4))
+    Current_Quantity = Column(Numeric(8, 4))
+    Prior_Price = Column(Numeric(8, 4))
+    Current_Price = Column(Numeric(8, 4))
+    Mark_to_Market_PnL_Position = Column(Numeric(8, 4))
+    Mark_to_Market_PnL_Transaction = Column(Numeric(8, 4))
+    Mark_to_Market_PnL_Commissions = Column(Numeric(8, 4))
+    Mark_to_Market_PnL_Other = Column(Numeric(8, 4))
+    Mark_to_Market_PnL_Total = Column(Numeric(8, 4))
     Code = Column(String(16))
     type = Column(SAIntEnum(CategoryType), nullable=False)
 
@@ -199,12 +199,12 @@ class ForexBalance(Base):
     Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
-    Quantity = Column(Numeric(6, 2))
+    Quantity = Column(Numeric(8, 4))
     Cost_Price = Column(Numeric(6, 4))
-    Unrealized_PnL_in_USD = Column(Numeric(6, 2))
-    Value_in_USD = Column(Numeric(6, 2))
+    Unrealized_PnL_in_USD = Column(Numeric(8, 4))
+    Value_in_USD = Column(Numeric(8, 4))
     Close_Price = Column(Numeric(6, 4))
-    Cost_Basis_in_USD = Column(Numeric(6, 2))
+    Cost_Basis_in_USD = Column(Numeric(8, 4))
     Code = Column(String(16))
 
     def __repr__(self):
@@ -218,11 +218,11 @@ class NetAssetValue(Base):
     id = Column(Integer, primary_key=True, index=True)
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Asset_Class = Column(String(255), nullable=False)
-    Prior_Total = Column(Numeric(6, 2))
-    Current_Long = Column(Numeric(6, 2))
-    Current_Short = Column(Numeric(6, 2))
-    Current_Total = Column(Numeric(6, 2))
-    Change = Column(Numeric(6, 2))
+    Prior_Total = Column(Numeric(8, 4))
+    Current_Long = Column(Numeric(8, 4))
+    Current_Short = Column(Numeric(8, 4))
+    Current_Total = Column(Numeric(8, 4))
+    Change = Column(Numeric(8, 4))
 
     def __repr__(self):
         return (
@@ -235,14 +235,14 @@ class OpenPositions(Base):
     id = Column(Integer, primary_key=True, index=True)
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Symbol = Column(String(16), nullable=False)
-    Quantity = Column(Numeric(6, 2))
+    Quantity = Column(Numeric(8, 4))
     Mult = Column(Integer(), nullable=False)
     Cost_Price = Column(Numeric(6, 4))
-    Cost_Basis = Column(Numeric(6, 2))
+    Cost_Basis = Column(Numeric(8, 4))
     Close_Price = Column(Numeric(6, 4))
-    Value = Column(Numeric(6, 2))
-    Unrealized_PnL = Column(Numeric(6, 2))
-    Unrealized_PnL_pct = Column(Numeric(6, 2))
+    Value = Column(Numeric(8, 4))
+    Unrealized_PnL = Column(Numeric(8, 4))
+    Unrealized_PnL_pct = Column(Numeric(8, 4))
     Code = Column(String(16))
 
     def __repr__(self):
@@ -259,8 +259,8 @@ class DepositsWithdrawals(Base):
     Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
-    Amount = Column(Numeric(6, 2))
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Amount = Column(Numeric(8, 4))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
         return (
@@ -274,8 +274,8 @@ class Dividends(Base):
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
-    Amount = Column(Numeric(6, 2))
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    Amount = Column(Numeric(8, 4))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
     Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
@@ -290,9 +290,9 @@ class WitholdingTax(Base):
     Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
-    Amount = Column(Numeric(6, 2))
+    Amount = Column(Numeric(8, 4))
     Code = Column(String(16))
-    QuoteInLocalCurrency = Column(Numeric(6, 2))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
     Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
@@ -322,13 +322,13 @@ class ChangeInDividendAccruals(Base):
     Symbol = Column(String(16), nullable=False)
     Date = Column(DateTime, nullable=False)
     Ex_Date = Column(DateTime, nullable=False)
-    Pay_Date = Column(DateTime, nullable=False)
-    Quantity = Column(Numeric(6, 2))
-    Tax = Column(Numeric(6, 2))
-    Fee = Column(Numeric(6, 2))
-    Gross_Rate = Column(Numeric(6, 2))
-    Gross_Amount = Column(Numeric(6, 2))
-    Net_Amount = Column(Numeric(6, 2))
+    Pay_Date = Column(DateTime)
+    Quantity = Column(Numeric(8, 4))
+    Tax = Column(Numeric(8, 4))
+    Fee = Column(Numeric(8, 4))
+    Gross_Rate = Column(Numeric(8, 4))
+    Gross_Amount = Column(Numeric(8, 4))
+    Net_Amount = Column(Numeric(8, 4))
     Code = Column(String(16))
 
 
