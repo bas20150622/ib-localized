@@ -9,6 +9,8 @@ class CategoryType(IntEnum):
     OPTIONS = 3
     FOREX = 4
     FOREX_CFDs = 5
+    FEES = 6
+    UNKNOWN = 7
 
 
 class NameValueType(IntEnum):
