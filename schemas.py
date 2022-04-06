@@ -57,8 +57,12 @@ class ToDateField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         # dump method - return naive datetime
         DT_TEXT_FMT = "%Y-%m-%d"   # "2020-11-13"
+        try:
+            dt = datetime.strptime(value, DT_TEXT_FMT)
+        except:
+            return None
 
-        return datetime.strptime(value, DT_TEXT_FMT)
+        return dt
 
     def _deserialize(self, value, attr, data, **kwargs):
         # load method
@@ -124,9 +128,11 @@ class Mark2MarketSchema(BaseSchema):
             "CFDs": CategoryType.CFDs,
             "Forex CFDs": CategoryType.FOREX_CFDs,
             "Forex": CategoryType.FOREX,
+            "Other Fees": CategoryType.FEES
 
         }
         data_type = data.get("Asset_Category")
+        data["type"] = CategoryType.UNKNOWN
         for match_str, trade_type in mapper.items():
             if data_type[:len(match_str)] == match_str:
                 data["type"] = trade_type
