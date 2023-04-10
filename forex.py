@@ -67,6 +67,8 @@ class ForexRate():
         '''
         # check for missing input
         if not isinstance(quote, str):
+            print(type(quote))
+            print(quote)
             raise ValueError(
                 "Error on quote: provide base=str, quote=str[default USD], dt=datetime")
         FIAT = ["USD", "EUR", "NOK", "GBP"]

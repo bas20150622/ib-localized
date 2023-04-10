@@ -1,7 +1,15 @@
 from enum import IntEnum
 
 # ********** IntEnum definitions
-
+class ModelType(IntEnum):
+    TRADE = 1
+    TRANSFER = 2
+    DEPOSITWITHDRAWAL = 3
+    MARK2MARKET = 4
+    CASHREPORT = 5
+    DIVIDEND = 6
+    WITHOLDINGTAX = 7
+    FEE = 8
 
 class CategoryType(IntEnum):
     STOCKS = 1
@@ -11,6 +19,7 @@ class CategoryType(IntEnum):
     FOREX_CFDs = 5
     FEES = 6
     UNKNOWN = 7
+    NONE = 8
 
 
 class NameValueType(IntEnum):

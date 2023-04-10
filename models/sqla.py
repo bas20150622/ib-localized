@@ -17,7 +17,7 @@ NAMING_CONVENTION = {
     "uq": "uq_%(table_name)s_%(column_0_name)s",
     "ck": "ck_%(table_name)s_%(constraint_name)s",
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    "pk": "pk_%(table_name)s"
+    "pk": "pk_%(table_name)s",
 }
 metadata = MetaData(naming_convention=NAMING_CONVENTION)
 Base = declarative_base(metadata=metadata)
@@ -83,20 +83,23 @@ class Account(Base):
     def __repr__(self):
         return f"Account {self.id}/ {self.account_id}: {self.user_name} @ {self.broker}"
 '''
+
+
 class Account(Base):
     # for account summaries
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True)
     Account = Column(String(), index=True)
     Account_Alias = Column(String())
-    Prior_NAV = Column(Numeric(8,2))
+    Prior_NAV = Column(Numeric(8, 2))
     Currency = Column(String())
-    Current_NAV = Column(Numeric(8,2))
-    TWR = Column(Numeric(5,2))
+    Current_NAV = Column(Numeric(8, 2))
+    TWR = Column(Numeric(5, 2))
     Name = Column(String())
 
+
 class Trade(Base):
-    __tablename__ = 'trades'
+    __tablename__ = "trades"
     id = Column(Integer, primary_key=True, index=True)
     Realized_PnL = Column(Numeric(8, 4))
     DataDiscriminator = Column(String(255), nullable=False)
@@ -106,7 +109,7 @@ class Trade(Base):
     Quantity = Column(Numeric(8, 4))
     Proceeds = Column(Numeric(8, 4))
     Currency = Column(String(16), nullable=False)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     MTM_PnL = Column(Numeric(8, 4))
     MTM_in_USD = Column(Numeric(8, 4))
     Comm_in_USD = Column(Numeric(8, 4))
@@ -121,16 +124,15 @@ class Trade(Base):
     type = Column(SAIntEnum(CategoryType), nullable=False)
 
     def __repr__(self):
-        return (
-            f"TRADE ID {self.id}"
-        )
+        return f"TRADE ID {self.id} {self.Account}"
+
 
 class Transfer(Base):
-    __tablename__ = 'transfers'
+    __tablename__ = "transfers"
     id = Column(Integer, primary_key=True, index=True)
-    Asset_Category  = Column(String(255), nullable=False)
+    Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Symbol = Column(String(16), nullable=False)
     DateTime = Column(DateTime, nullable=False)
     _Type = Column(String(255), nullable=False)
@@ -138,7 +140,7 @@ class Transfer(Base):
     Xfer_Company = Column(String(255), nullable=False)
     Xfer_Account = Column(String(32), nullable=False)
     Qty = Column(Numeric(8, 4))
-    Xfer_Price = Column(Numeric(8, 4))  
+    Xfer_Price = Column(Numeric(8, 4))
     Market_Value = Column(Numeric(8, 4))
     Realized_PnL = Column(Numeric(8, 4))
     Cash_Amount = Column(Numeric(8, 4))
@@ -147,32 +149,29 @@ class Transfer(Base):
     QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
-        return (
-            f"TRANSER ID {self.id}"
-        )
+        return f"TRANSER ID {self.id} {self.Account}"
 
 
 class CashReport(Base):
-    __tablename__ = 'cashreport'
+    __tablename__ = "cashreport"
     id = Column(Integer, primary_key=True, index=True)
     Currency_Summary = Column(String(255))
     Currency = Column(String(16), nullable=False)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Total = Column(Numeric(8, 4))
-    Securities= Column(Numeric(8, 4))
+    Securities = Column(Numeric(8, 4))
     Futures = Column(Numeric(8, 4))
     IB_UKL = Column(Numeric(8, 4))
     QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
-        return (
-            f"CASHREPORT ID {self.id}"
-        )
+        return f"CASHREPORT ID {self.id} {self.Account}"
+
 
 class Mark2Market(Base):
-    __tablename__ = 'mark2market'
+    __tablename__ = "mark2market"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Asset_Category = Column(String(255))
     Symbol = Column(String(16), nullable=False)
     Prior_Quantity = Column(Numeric(8, 4))
@@ -188,14 +187,13 @@ class Mark2Market(Base):
     type = Column(SAIntEnum(CategoryType), nullable=False)
 
     def __repr__(self):
-        return (
-            f"MARK2MARKET ID {self.id}")
+        return f"MARK2MARKET ID {self.id} {self.Account}"
 
 
 class ForexBalance(Base):
-    __tablename__ = 'forexbalance'
+    __tablename__ = "forexbalance"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
@@ -208,15 +206,13 @@ class ForexBalance(Base):
     Code = Column(String(16))
 
     def __repr__(self):
-        return (
-            f"FOREX BALANCE ID {self.id}"
-        )
+        return f"FOREX BALANCE ID {self.id} {self.Account}"
 
 
 class NetAssetValue(Base):
-    __tablename__ = 'netassetvalue'
+    __tablename__ = "netassetvalue"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Asset_Class = Column(String(255), nullable=False)
     Prior_Total = Column(Numeric(8, 4))
     Current_Long = Column(Numeric(8, 4))
@@ -225,15 +221,13 @@ class NetAssetValue(Base):
     Change = Column(Numeric(8, 4))
 
     def __repr__(self):
-        return (
-            f"NET ASSET VALUE ID {self.id}"
-        )
+        return f"NET ASSET VALUE ID {self.id} {self.Account}"
 
 
 class OpenPositions(Base):
-    __tablename__ = 'openpositions'
+    __tablename__ = "openpositions"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Symbol = Column(String(16), nullable=False)
     Quantity = Column(Numeric(8, 4))
     Mult = Column(Integer(), nullable=False)
@@ -246,31 +240,70 @@ class OpenPositions(Base):
     Code = Column(String(16))
 
     def __repr__(self):
-        return (
-            f"OPEN POSITION ID {self.id}"
-        )
+        return f"OPEN POSITION ID {self.id} {self.Account}"
+
+
+class RealizedUnrealizedPerformance(Base):
+    __tablename__ = "realizedunrealizedperformance"
+    id = Column(Integer, primary_key=True, index=True)
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
+    Asset_Category = Column(String(255), nullable=False)
+    Symbol = Column(String(16), nullable=False)
+    Cost_Adj = Column(Numeric(8, 4))
+    Realized_ST_Profit = Column(Numeric(8, 4))
+    Realized_ST_Loss = Column(Numeric(8, 4))
+    Realized_LT_Profit = Column(Numeric(8, 4))
+    Realized_LT_Loss = Column(Numeric(8, 4))
+    Realized_Total = Column(Numeric(8, 4))
+    Unrealized_ST_Profit = Column(Numeric(8, 4))
+    Unrealized_ST_Loss = Column(Numeric(8, 4))
+    Unrealized_LT_Profit = Column(Numeric(8, 4))
+    Unrealized_LT_Loss = Column(Numeric(8, 4))
+    Unrealized_Total = Column(Numeric(8, 4))
+    Total = Column(Numeric(8, 4))
+    Code = Column(String(16))
+    type = Column(SAIntEnum(CategoryType), nullable=False)
+
+
+class CorporateActions(Base):
+    __tablename__ = "corporateactions"
+    id = Column(Integer, primary_key=True, index=True)
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
+    Asset_Category = Column(String(255), nullable=False)
+    Currency = Column(String(16), nullable=False)
+    Report_Date = Column(DateTime, nullable=False)
+    DateTime = Column(DateTime, nullable=False)
+    Description = Column(String(255))
+    Proceeds = Column(Numeric(8, 4))
+    Code = Column(String(16))
+    Value = Column(Numeric(8, 4))
+    Quantity = Column(Numeric(8, 4))
+    Realized_PnL = Column(Numeric(8, 4))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
+    type = Column(SAIntEnum(CategoryType), nullable=False)
+
+    def __repr__(self):
+        return f"CORPORATE ACTIONS ID {self.id} {self.Account}: {self.Description} @ {self.DateTime}"
 
 
 class DepositsWithdrawals(Base):
-    __tablename__ = 'depositswithdrawals'
+    __tablename__ = "depositswithdrawals"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Currency = Column(String(16), nullable=False)
-    Account = Column(String(16), nullable=True)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(8, 4))
     QuoteInLocalCurrency = Column(Numeric(8, 4))
 
     def __repr__(self):
-        return (
-            f"DEPOSITS WITHDRAWALS ID {self.id}: {self.Amount} {self.Currency} @ {self.DateTime}")
+        return f"DEPOSITS WITHDRAWALS ID {self.id} {self.Account}: {self.Amount} {self.Currency} @ {self.DateTime}"
 
 
 class Dividends(Base):
-    __tablename__ = 'dividends'
+    __tablename__ = "dividends"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Currency = Column(String(16), nullable=False)
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
@@ -279,15 +312,29 @@ class Dividends(Base):
     Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
-        return (
-            f"DIVIDEND ID {self.id}: {self.Symbol}: {self.Amount} {self.Currency}")
+        return f"DIVIDEND ID {self.id} {self.Account}: {self.Symbol}: {self.Amount} {self.Currency}"
+
+
+class Fees(Base):
+    __tablename__ = "fees"
+    id = Column(Integer, primary_key=True, index=True)
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
+    Currency = Column(String(16), nullable=False)
+    Description = Column(String(256))
+    DateTime = Column(DateTime, nullable=False)
+    Amount = Column(Numeric(8, 4))
+    QuoteInLocalCurrency = Column(Numeric(8, 4))
+    Subtitle = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"FEE ID {self.id} {self.Account}: {self.Currency}: {self.Amount} {self.Description}"
 
 
 class WitholdingTax(Base):
-    __tablename__ = 'witholdingtax'
+    __tablename__ = "witholdingtax"
     id = Column(Integer, primary_key=True, index=True)
     Currency = Column(String(16), nullable=False)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Description = Column(String(256))
     DateTime = Column(DateTime, nullable=False)
     Amount = Column(Numeric(8, 4))
@@ -296,27 +343,25 @@ class WitholdingTax(Base):
     Symbol = Column(String(16), nullable=False)
 
     def __repr__(self):
-        return (
-            f"WITHOLDING TAX ID {self.id} {self.Symbol}: {self.Amount} {self.Currency}")
+        return f"WITHOLDING TAX ID {self.id} {self.Account} {self.Symbol}: {self.Amount} {self.Currency}"
 
 
 class NameValue(Base):
-    __tablename__ = 'namevalue'
+    __tablename__ = "namevalue"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Name = Column(String(256), nullable=False)
     Value = Column(String(256), nullable=False)
     type = Column(SAIntEnum(NameValueType), nullable=False)
 
     def __repr__(self):
-        return (
-            f"NAME_VALUE ID {self.id}/{NameValueType(self.type).name} {self.Name}: {self.Value}")
+        return f"NAME_VALUE ID {self.id} {self.Account}/{NameValueType(self.type).name} {self.Name}: {self.Value}"
 
 
 class ChangeInDividendAccruals(Base):
-    __tablename__ = 'changedividendaccruals'
+    __tablename__ = "changedividendaccruals"
     id = Column(Integer, primary_key=True, index=True)
-    Account = Column(String, ForeignKey('accounts.Account', ondelete="CASCADE"))
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
     Asset_Category = Column(String(255), nullable=False)
     Currency = Column(String(16), nullable=False)
     Symbol = Column(String(16), nullable=False)
@@ -331,18 +376,20 @@ class ChangeInDividendAccruals(Base):
     Net_Amount = Column(Numeric(8, 4))
     Code = Column(String(16))
 
+    def __repr__(self):
+        return f"CHANGE IN DIVIDENT ACCRUALS ID {self.id} {self.Account}"
 
-class tradePosition(Base):
+
+class _tradePosition(Base):
+    # legacy tradePosition lacking account
     __tablename__ = "tradepos"
     id = Column(Integer, primary_key=True, index=True)
     qty = Column(Numeric(15, 7))
     open_dt = Column(DateTime, nullable=False)
     close_dt = Column(DateTime, nullable=True)
-    status = Column(SAIntEnum(TradePositionStatus),
-                    default=TradePositionStatus.OPEN)
+    status = Column(SAIntEnum(TradePositionStatus), default=TradePositionStatus.OPEN)
     created = Column(DateTime, default=datetime.utcnow)
-    updated = Column(DateTime, default=datetime.utcnow,
-                     onupdate=datetime.utcnow)
+    updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     asset = Column(String(16))
     o_price_base = Column(Numeric(15, 7))  # opening price in base (USD)
     c_price_base = Column(Numeric(15, 7))  # closing price in base (USD)
@@ -354,7 +401,34 @@ class tradePosition(Base):
 
     def __repr__(self):
         return (
-            f'TRADEPOS {self.id} {self.status.name} {self.asset} {self.qty} @ {self.o_price_base}/'
-            f'{self.o_price_local}  '
+            f"TRADEPOS {self.id} {self.status.name} {self.asset} {self.qty} @ {self.o_price_base}/"
+            f"{self.o_price_local}  "
+            f'- opened {self.open_dt}/ closed {self.close_dt} pnl {self.pnl_base if self.pnl_base else "N/A"}'
+        )
+
+
+class tradePosition(Base):
+    __tablename__ = "tradepos2"
+    id = Column(Integer, primary_key=True, index=True)
+    Account = Column(String, ForeignKey("accounts.Account", ondelete="CASCADE"))
+    qty = Column(Numeric(15, 7))
+    open_dt = Column(DateTime, nullable=False)
+    close_dt = Column(DateTime, nullable=True)
+    status = Column(SAIntEnum(TradePositionStatus), default=TradePositionStatus.OPEN)
+    created = Column(DateTime, default=datetime.utcnow)
+    updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    asset = Column(String(16))
+    o_price_base = Column(Numeric(15, 7))  # opening price in base (USD)
+    c_price_base = Column(Numeric(15, 7))  # closing price in base (USD)
+    o_price_local = Column(Numeric(15, 7))  # NOK
+    c_price_local = Column(Numeric(15, 7))  # NOK
+    pnl_base = Column(Numeric(15, 7))
+    pnl_local = Column(Numeric(15, 7))
+    multiplier = Column(Integer, default=1)  # -1 for short positions
+
+    def __repr__(self):
+        return (
+            f"TRADEPOS {self.id} {self.Account} {self.status.name} {self.asset} {self.qty} @ {self.o_price_base}/"
+            f"{self.o_price_local}  "
             f'- opened {self.open_dt}/ closed {self.close_dt} pnl {self.pnl_base if self.pnl_base else "N/A"}'
         )
